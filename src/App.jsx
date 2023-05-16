@@ -2,42 +2,67 @@ import React, {Fragment, useState, useRef} from 'react';
 import { TodoList } from './components/TodoList';
 
 
-export function App(){
-    const [todos, setTodos] = useState([
-        {id: 1, task: 'Tarea 1', completed: false}
-    ]);
+class App extends React.Component{
 
-    const todoTaskRef = useRef();
+    constructor(props){
+        super(props);
+        this.state = {
+            tasks: [
+                {
+                    id: 1,
+                    task: 'Tarea 1',
+                    completed: false
+                }
+            ],
+            newTask: ''
+        }
+        this.inputChanging = this.inputChanging.bind(this);
+        this.toggleTodo = this.toggleTodo.bind(this);
+        this.handleTodoAdd = this.handleTodoAdd.bind(this);
+        this.handleDeleteTask = this.handleDeleteTask.bind(this);
+    }
 
-    const toggleTodo = (id) => {
-        const copy = [...todos];
+    toggleTodo = (id) => {
+        const copy = [...this.state.tasks];
         const update = copy.find((todo) => todo.id === id);
         update.completed = !update.completed;
-        setTodos(copy);
+        this.setState({tasks: copy});
     }
 
-    const handleTodoAdd = () => {
-        const task = todoTaskRef.current.value;
+    handleTodoAdd = () => {
+        
+        const task = this.state.newTask;
         if(task === '') return;
-        setTodos((prevState) => {
-          return [...prevState, {id: Math.floor(Math.random() * 1000), task: task, completed: false}];
+        this.setState((prevState) => {
+          return {newTask: '', tasks: [...prevState.tasks, {id: Math.floor(Math.random() * 1000), task: task, completed: false}]};
         })
-        todoTaskRef.current.value = null;
     }
 
-    const handleDeleteTask = () => {
-        const todoListCopy = [...todos];
+    handleDeleteTask = () => {
+        const todoListCopy = [...this.state.tasks];
         const updatedList = todoListCopy.filter((todo) =>  !todo.completed );
-        setTodos(updatedList);
+        this.setState({tasks: updatedList});
     }
 
-    return (
-    <Fragment>
-        <TodoList toggleTodo={toggleTodo} todos={todos}/>
-        <input ref={todoTaskRef}type="text" placeholder='Nueva Tarea'/>
-        <button onClick={handleTodoAdd}>Agregar</button>
-        <button onClick={handleDeleteTask}>Eliminar</button>
-        <div>Te quedan {todos.filter((todo) => !todo.completed).length} tareas por terminar</div>
-    </Fragment>
-    );
+    inputChanging(event){
+        
+        this.setState({newTask: event.target.value});
+    }
+
+
+    render(){
+
+        return (
+        <Fragment>
+            <TodoList toggleTodo={this.toggleTodo} todos={this.state.tasks}/>
+            <input value={this.state.newTask} onChange={this.inputChanging} type="text" placeholder='Nueva Tarea'/>
+            <button onClick={this.handleTodoAdd}>Agregar</button>
+            <button onClick={this.handleDeleteTask}>Eliminar</button>
+            <div>Te quedan {this.state.tasks.filter((todo) => !todo.completed).length} tareas por terminar</div>
+        </Fragment>
+        );
+    }
+
+    
 }
+export default App;
